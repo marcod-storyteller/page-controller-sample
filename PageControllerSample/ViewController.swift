@@ -14,6 +14,14 @@ class ViewController: UIViewController {
         return scrollView
     }()
 
+    lazy var refreshControl: UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.tintColor = .white
+        control.translatesAutoresizingMaskIntoConstraints = false
+        control.addTarget(self, action: #selector(didPullRefresh), for: .valueChanged)
+        return control
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -28,6 +36,7 @@ class ViewController: UIViewController {
         ])
 
         setupPageViewController()
+        setupRefreshControl()
     }
 
     private func setupPageViewController() {
@@ -58,6 +67,21 @@ class ViewController: UIViewController {
         self.pageViewController = pageViewController
 
         pageViewController.setViewControllers([pages[0]], direction: .forward, animated: true, completion: nil)
+    }
+
+    private func setupRefreshControl() {
+        scrollView.refreshControl = refreshControl
+        scrollView.bringSubviewToFront(refreshControl)
+        NSLayoutConstraint.activate([
+            refreshControl.topAnchor.constraint(equalTo: scrollView.safeAreaLayoutGuide.topAnchor, constant: 32),
+            refreshControl.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+        ])
+    }
+
+    @objc private func didPullRefresh() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.refreshControl.endRefreshing()
+        }
     }
 }
 
